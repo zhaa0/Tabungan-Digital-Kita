@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Buku Tabungan Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5EFE0;
+    --paper-soft:#EFE7CF;
+    --paper-line:#D0C5A8;
+    --ink-green:#1B493B;
+    --ink-green-dark:#0D2B22;
+    --gold:#C0933C;
+    --gold-soft:#E5D09E;
+    --gold-bright:#F5D77F;
+    --charcoal:#2F2922;
+    --credit:#2D8A5E;
+    --debit:#B54235;
+    --muted:#8A8062;
+    --person-a: var(--ink-green);
+    --person-b: #643F82;
+    --person-b-soft: #EBE1F5;
+    --white-card:#FCFAF5;
+    --radius:16px;
+    --shadow-sm: 0 4px 12px rgba(31,77,61,0.04);
+    --shadow-md: 0 12px 28px rgba(31,77,61,0.08), 0 2px 8px rgba(31,77,61,0.04);
+    --shadow-lg: 0 24px 48px rgba(21,43,35,0.12), 0 4px 12px rgba(21,43,35,0.06);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1000px 600px at 50% -100px, rgba(192,147,60,0.12), transparent),
+      var(--paper);
+    color:var(--charcoal);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:36px 16px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  .wrap{ max-width:720px; margin:0 auto; }
+
+  .cover{
+    background: linear-gradient(135deg, var(--ink-green-dark) 0%, var(--ink-green) 100%);
+    border-radius: var(--radius);
+    padding: 30px 32px 26px;
+    color: #F8F5EC;
+    position:relative;
+    overflow:hidden;
+    box-shadow: var(--shadow-lg);
+    border-top: 4px solid var(--gold);
+    transition: var(--transition);
+  }
+  .cover::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 34px);
+    pointer-events:none;
+  }
+  .cover::after{
+    content:"";
+    position:absolute; top:-50%; right:-20%; width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(245,215,127,0.08) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .cover-top{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    position:relative; z-index:1;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:0.15em; text-transform:uppercase;
+    color: var(--gold-soft); font-weight: 500;
+  }
+  .cover-title{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:32px;
+    margin: 6px 0 2px;
+    letter-spacing:0.01em;
+  }
+  .cover-sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color: rgba(248,245,236,0.65);
+  }
+  .rekening{
+    text-align:right;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color: rgba(248,245,236,0.7);
+    line-height:1.7;
+  }
+  .rekening span {
+    display: inline-block;
+    margin-top: 4px;
+    background: rgba(255,255,255,0.06);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .name-row{
+    margin-top:22px; position:relative; z-index:1;
+    display:flex; gap:20px; align-items:center; flex-wrap:wrap;
+  }
+  .badge-dot{ width:10px; height:10px; border-radius:50%; display:inline-block; flex-shrink:0; position:relative; }
+  .badge-dot::after {
+    content: ''; position: absolute; inset: -3px; border-radius: 50%;
+    border: 1px solid rgba(248,245,236,0.4); opacity: 0.8;
+  }
+  .dot-a{ background: var(--person-a); }
+  .dot-b{ background: var(--person-b); }
+
+  .saldo-card{
+    background: var(--white-card);
+    border-radius: var(--radius);
+    margin-top:-18px;
+    position:relative; z-index:2;
+    padding: 26px 30px 24px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(31,77,61,0.06);
+    transition: var(--transition);
+  }
+  .saldo-card:hover{
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .saldo-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted);
+    font-weight: 500;
+  }
+  .saldo-value{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: clamp(36px, 8vw, 52px);
+    color: var(--ink-green-dark);
+    margin: 6px 0 2px;
+    line-height:1.05;
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .saldo-value .rp{ font-size:0.5em; color:var(--gold); font-weight:600; }
+
+  .person-totals{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px;
+  }
+  .person-card{
+    border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:12px;
+    border:1px solid rgba(31,77,61,0.08);
+    transition: var(--transition);
+  }
+  .person-card:hover{
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .person-card .avatar{
+    width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:14px; color:#F8F5EC; flex-shrink:0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .person-card.a{ background: rgba(27,73,59,0.04); border-color: rgba(27,73,59,0.1); }
+  .person-card.a .avatar{ background: var(--person-a); }
+  .person-card.b{ background: var(--person-b-soft); border-color: rgba(100,63,130,0.1); }
+  .person-card.b .avatar{ background: var(--person-b); }
+  .person-card .p-name{ font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace; margin-bottom: 2px; }
+  .person-card .p-val{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:14.5px; color:var(--charcoal); }
+
+  .person-toggle{
+    display:flex; gap:8px; margin-bottom:2px;
+  }
+  .person-chip{
+    flex:1; padding:10px; border-radius:10px; border:1.5px solid var(--paper-line);
+    background:var(--white-card); font-family:'Inter'; font-size:13px; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px; color:var(--muted);
+    transition: var(--transition);
+  }
+  .person-chip .dot{ width:8px; height:8px; border-radius:50%; }
+  .person-chip.a-active{ border-color:var(--person-a); color:var(--person-a); background: rgba(27,73,59,0.06); box-shadow: 0 0 0 3px rgba(27,73,59,0.05); }
+  .person-chip.b-active{ border-color:var(--person-b); color:var(--person-b); background: var(--person-b-soft); box-shadow: 0 0 0 3px rgba(100,63,130,0.05); }
+
+  .goal-row{
+    margin-top:20px;
+    background: rgba(208,197,168,0.15);
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px dashed var(--paper-line);
+  }
+  .goal-head{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--muted);
+    margin-bottom:10px; gap:8px; flex-wrap:wrap;
+  }
+  .goal-edit{
+    display:flex; align-items:center; gap:6px;
+  }
+  .goal-edit input{
+    width:110px; border:1px solid var(--paper-line); border-radius:6px;
+    padding:4px 8px; font-family:'IBM Plex Mono',monospace; font-size:12px;
+    background: var(--paper-soft); color:var(--charcoal);
+  }
+  .goal-edit button{
+    border:none; background:var(--ink-green); color:#F8F5EC;
+    font-family:'Inter'; font-size:11px; padding:5px 12px; border-radius:6px; cursor:pointer;
+    font-weight: 600; transition: var(--transition);
+  }
+  .goal-edit button:hover{ background:var(--ink-green-dark); }
+
+  .track{
+    position:relative; height:12px; border-radius:8px;
+    background: var(--paper-soft);
+    overflow:visible;
+    border:1px solid rgba(27,73,59,0.1);
+  }
+  .track-fill{
+    position:absolute; top:0; left:0; bottom:0;
+    border-radius:8px;
+    background: linear-gradient(90deg, var(--gold-soft), var(--gold));
+    transition: width 0.6s cubic-bezier(.2,.8,.2,1);
+    min-width: 6px;
+  }
+  .track-marker{
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:24px; height:24px; border-radius:50%;
+    background: #FFF;
+    border:2.5px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.15);
+    transition: left 0.6s cubic-bezier(.2,.8,.2,1);
+    animation: pigWiggle 3s infinite ease-in-out;
+  }
+  @keyframes pigWiggle {
+    0%, 100% { transform: translate(-50%,-50%) rotate(0deg); }
+    50% { transform: translate(-50%,-50%) rotate(10deg); }
+  }
+  .goal-foot{
+    margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted);
+    display:flex; justify-content:space-between;
+    font-weight: 500;
+  }
+
+  .stamp{
+    position:absolute; top:18px; right:22px;
+    width:84px; height:84px; border:3px dashed var(--debit);
+    color: var(--debit);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:11px;
+    transform: rotate(-12deg);
+    opacity:0.95;
+    letter-spacing:0.05em;
+    pointer-events:none;
+    animation: stampIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(252,250,245,0.9);
+    box-shadow: 0 4px 10px rgba(181,66,53,0.1);
+  }
+  @keyframes stampIn{ from{ transform: rotate(-12deg) scale(2.2); opacity:0;} to{ transform: rotate(-12deg) scale(1); opacity:0.95; } }
+
+  .actions{
+    display:flex; gap:12px; margin-top:20px; flex-wrap:wrap;
+  }
+  .action-btn{
+    flex:1; min-width:140px;
+    border:none; border-radius:12px; padding:14px 16px;
+    font-family:'Inter'; font-weight:600; font-size:14.5px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition: var(--transition);
+  }
+  .action-btn:hover{ transform: translateY(-2px); }
+  .action-btn:active{ transform: translateY(0); }
+  .action-btn.setor{
+    background: var(--credit); color:#F8F5EC;
+    box-shadow: 0 4px 12px rgba(45,138,94,0.2);
+  }
+  .action-btn.setor:hover{ background: #24754E; box-shadow: 0 6px 18px rgba(45,138,94,0.3); }
+  .action-btn.tarik{
+    background: var(--white-card); color:var(--debit); border:1.5px solid var(--debit);
+  }
+  .action-btn.tarik:hover{ background: rgba(181,66,53,0.05); }
+
+  .form-panel{
+    margin-top:20px; background: var(--paper-soft); border-radius:12px;
+    padding:20px; display:none; border:1.5px dashed var(--paper-line);
+    animation: slideDown 0.3s ease-out;
+  }
+  @keyframes slideDown{ from{ opacity:0; transform: translateY(-10px); } to{ opacity:1; transform: translateY(0); } }
+  .form-panel.open{ display:block; }
+  .form-title{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.1em; font-weight: 600; }
+  .form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .form-grid.full{ grid-template-columns: 1fr; }
+  .form-panel label{ font-size:11px; color:var(--muted); display:block; margin-bottom:6px; font-family:'IBM Plex Mono',monospace; font-weight:500; }
+  .form-panel input{
+    width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--paper-line);
+    background:var(--white-card); font-family:'Inter'; font-size:14px; color:var(--charcoal);
+    transition: var(--transition);
+  }
+  .form-panel input:focus, .goal-edit input:focus{ outline:none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(192,147,60,0.15); }
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .chip{
+    padding:6px 12px; border-radius:20px; border:1px solid var(--paper-line);
+    background:var(--white-card); font-size:12px; font-family:'IBM Plex Mono',monospace;
+    cursor:pointer; color:var(--ink-green); transition: var(--transition);
+  }
+  .chip:hover{ background:var(--gold-soft); border-color: var(--gold); color: var(--ink-green-dark); }
+  .form-submit-row{ display:flex; gap:10px; margin-top:16px; justify-content:flex-end; }
+  .btn-cancel{ background:none; border:none; color:var(--muted); font-family:'Inter'; font-size:13.5px; cursor:pointer; padding:8px 16px; font-weight: 500; }
+  .btn-cancel:hover{ color: var(--debit); }
+  .btn-save{ background:var(--ink-green); color:#F8F5EC; border:none; border-radius:8px; padding:10px 22px; font-family:'Inter'; font-weight:600; font-size:13.5px; cursor:pointer; transition: var(--transition); }
+  .btn-save:hover{ background:var(--ink-green-dark); }
+
+  .stats{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px;
+  }
+  .stat{
+    background:rgba(208,197,168,0.2); border-radius:12px; padding:14px 10px; text-align:center;
+    border:1px solid rgba(27,73,59,0.04);
+    transition: var(--transition);
+  }
+  .stat:hover{ background: rgba(208,197,168,0.3); }
+  .stat-val{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:15.5px; color:var(--ink-green-dark); }
+  .stat-lbl{ font-size:10.5px; color:var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:0.07em; font-weight: 500; }
+
+  .ledger{
+    margin-top:26px; background:var(--white-card); border-radius:var(--radius);
+    box-shadow: var(--shadow-md); overflow:hidden; border: 1px solid rgba(27,73,59,0.06);
+    transition: var(--transition);
+  }
+  .ledger:hover{
+    box-shadow: var(--shadow-lg);
+  }
+  .ledger-head{
+    background: linear-gradient(135deg, var(--ink-green-dark), var(--ink-green));
+    color:#F8F5EC;
+    padding:16px 20px; font-family:'Fraunces',serif; font-size:17px; font-weight:600;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .ledger-head span{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--gold-soft); font-weight:500; letter-spacing:0.05em; }
+  table{ width:100%; border-collapse:collapse; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+  thead th{
+    text-align:left; padding:10px 12px; font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--muted); border-bottom:1px solid var(--paper-line); background:var(--paper-soft);
+    font-weight: 600;
+  }
+  thead th.num, tbody td.num{ text-align:right; }
+  tbody td{ padding:12px 12px; border-bottom:1px solid rgba(208,197,168,0.4); color:var(--charcoal); }
+  tbody tr{ transition: var(--transition); }
+  tbody tr:hover{ background: rgba(192,147,60,0.05); }
+  .desc-cell{ display:flex; align-items:center; gap:6px; }
+  .desc-cell .mini-stamp{
+    font-size:10px; border:1px solid var(--gold); color:var(--gold); border-radius:50%;
+    width:18px; height:18px; display:flex; align-items:center; justify-content:center; transform:rotate(-10deg);
+    font-weight: bold; background: rgba(192,147,60,0.1);
+  }
+  .credit-txt{ color:var(--credit); font-weight:600; }
+  .debit-txt{ color:var(--debit); font-weight:600; }
+  .empty-row td{ text-align:center; padding:36px 12px; color:var(--muted); font-family:'Inter'; font-size:13.5px; }
+  .del-btn{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 8px; border-radius:6px;
+    transition: var(--transition);
+  }
+  .del-btn:hover{ color:var(--debit); background:rgba(181,66,53,0.08); }
+
+  .footnote{
+    text-align:center; margin-top:20px; font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace;
+  }
+
+  @media (max-width:520px){
+    body { padding: 16px 8px 40px; }
+    .cover { padding: 20px 20px 32px; }
+    .cover-title { font-size: 26px; }
+    .rekening { text-align: left; margin-top: 10px; width: 100%; }
+    .rekening span { font-size: 11px; }
+    .cover-top { flex-direction: column; }
+    .saldo-card { padding: 20px 16px 18px; }
+    .form-grid{ grid-template-columns:1fr; }
+    .stats{ grid-template-columns:repeat(3,1fr); gap:8px; }
+    .stat{ padding:10px 4px; }
+    .stat-val{ font-size:13px; }
+    table{ font-size:11.5px; }
+    thead th, tbody td{ padding:10px 8px; }
+    .stamp{ width:68px; height:68px; font-size:9.5px; top:14px; right:14px;}
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.9); opacity: 0.6; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.6; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cover">
+    <div class="cover-top">
+      <div>
+        <div class="cover-eyebrow">Buku Tabungan Digital</div>
+        <div class="cover-title">Tabungan Kita</div>
+        <div class="cover-sub">dicatat rapi, disimpan aman</div>
+      </div>
+      <div class="rekening">
+        NO. REKENING<br/>
+        <span style="color:#F3ECD8; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:0.04em;">BPD Kaltimtara - 1502047040</span>
+      </div>
+    </div>
+    <div class="name-row" style="display:flex; gap:20px; align-items:center; flex-wrap:wrap; margin-top:16px;">
+      <div style="display:inline-flex; align-items:center; gap:8px;">
+        <span class="badge-dot dot-a" style="margin:0;"></span>
+        <span style="color:#F3ECD8; font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.02em;">
+          <span style="color:var(--gold-soft); font-weight:500;">Penabung 1:</span> Ridwan
+        </span>
+      </div>
+      <div style="display:inline-flex; align-items:center; gap:8px;">
+        <span class="badge-dot dot-b" style="margin:0;"></span>
+        <span style="color:#F3ECD8; font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:0.02em;">
+          <span style="color:var(--gold-soft); font-weight:500;">Penabung 2:</span> Hafizha
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="saldo-card" id="saldoCard" style="position:relative;">
+    <div class="saldo-label">Saldo saat ini</div>
+    <div class="saldo-value"><span class="rp">Rp</span><span id="saldoValue">0</span></div>
+
+    <div class="person-totals">
+      <div class="person-card a">
+        <div class="avatar" id="avatarA">1</div>
+        <div>
+          <div class="p-name" id="pNameA">Penabung 1</div>
+          <div class="p-val" id="pValA">Rp 0</div>
+        </div>
+      </div>
+      <div class="person-card b">
+        <div class="avatar" id="avatarB">2</div>
+        <div>
+          <div class="p-name" id="pNameB">Penabung 2</div>
+          <div class="p-val" id="pValB">Rp 0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="goal-row">
+      <div class="goal-head">
+        <span id="goalPercentText">Target belum diatur</span>
+        <div class="goal-edit">
+          <input id="goalInput" type="number" placeholder="Target (Rp)" min="0" />
+          <button id="goalSaveBtn">Atur</button>
+        </div>
+      </div>
+      <div class="track">
+        <div class="track-fill" id="trackFill" style="width:0%"></div>
+        <div class="track-marker" id="trackMarker" style="left:0%">🐖</div>
+      </div>
+      <div class="goal-foot">
+        <span id="goalCurrentText">Rp 0</span>
+        <span id="goalTargetText">Target: —</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="action-btn setor" id="btnSetor">↓ Setor</button>
+      <button class="action-btn tarik" id="btnTarik">↑ Tarik</button>
+    </div>
+
+    <div class="form-panel" id="formPanel">
+      <div class="form-title" id="formTitle">Catat transaksi</div>
+      <label style="margin-bottom:6px; display:block;">Siapa yang menabung?</label>
+      <div class="person-toggle" id="personToggle">
+        <button type="button" class="person-chip" id="chipPersonA"><span class="dot" style="background:var(--person-a)"></span><span id="chipPersonALabel">Penabung 1</span></button>
+        <button type="button" class="person-chip" id="chipPersonB"><span class="dot" style="background:var(--person-b)"></span><span id="chipPersonBLabel">Penabung 2</span></button>
+      </div>
+      <div class="form-grid" style="margin-top:12px;">
+        <div>
+          <label>Jumlah (Rp)</label>
+          <input id="txAmount" type="number" min="0" placeholder="0" />
+        </div>
+        <div>
+          <label>Tanggal</label>
+          <input id="txDate" type="date" />
+        </div>
+      </div>
+      <div class="chips" id="chipRow"></div>
+      <div class="form-grid full" style="margin-top:10px;">
+        <div>
+          <label>Keterangan</label>
+          <input id="txNote" type="text" placeholder="mis. sisa jajan, hasil freelance..." />
+        </div>
+      </div>
+      <div class="form-submit-row">
+        <button class="btn-cancel" id="btnCancel">Batal</button>
+        <button class="btn-save" id="btnSave">Simpan</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="statTotalSetor">Rp 0</div><div class="stat-lbl">Total setor</div></div>
+      <div class="stat"><div class="stat-val" id="statTotalTarik">Rp 0</div><div class="stat-lbl">Total tarik</div></div>
+      <div class="stat"><div class="stat-val" id="statCount">0</div><div class="stat-lbl">Transaksi</div></div>
+    </div>
+  </div>
+
+  <div class="ledger" style="margin-top:22px;">
+    <div class="ledger-head">
+      <span>Rekap & Grafik Bulanan</span>
+    </div>
+    <div style="padding:18px 18px 12px; background:var(--white-card); overflow-x:auto;">
+      <div id="chartContainer" style="margin-bottom:20px;"></div>
+      <table style="width:100%; min-width:550px;">
+        <thead>
+          <tr>
+            <th>Bulan</th>
+            <th class="num">Ridwan (Setor)</th>
+            <th class="num">Hafizha (Setor)</th>
+            <th class="num">Total Setor</th>
+            <th class="num">Total Tarik</th>
+            <th class="num">Bersih</th>
+          </tr>
+        </thead>
+        <tbody id="recapBody">
+          <tr class="empty-row"><td colspan="6">Belum ada transaksi bulanan.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="ledger">
+    <div class="ledger-head">
+      <span>Riwayat Transaksi</span>
+      <span id="ledgerCount">0 catatan</span>
+    </div>
+    <div style="overflow-x: auto; width: 100%;">
+      <table style="width:100%; min-width:580px;">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Oleh</th>
+            <th>Keterangan</th>
+            <th class="num">Debit</th>
+            <th class="num">Kredit</th>
+            <th class="num">Saldo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ledgerBody">
+          <tr class="empty-row"><td colspan="7">Belum ada transaksi. Mulai dengan menekan "Setor".</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footnote" id="syncFootnote">Menghubungkan ke database...</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+  const fmtPlain = (n) => Math.round(n).toLocaleString('id-ID');
+
+  // ======================================================================
+  // SINKRONISASI OTOMATIS — FIREBASE REALTIME DATABASE
+  // Semua perangkat yang membuka file ini terhubung ke path data yang sama
+  // (tabunganKita/data), jadi tidak perlu ID acak per perangkat lagi.
+  // Listener db.ref(...).on('value', ...) bikin perubahan di satu perangkat
+  // langsung muncul di perangkat lain dalam hitungan detik, tanpa refresh.
+  //
+  // ISI 3 NILAI DI BAWAH DENGAN YANG MUNCUL DI FIREBASE CONSOLE KAMU:
+  // Project Settings > Your apps > (ikon </>) > firebaseConfig
+  // ======================================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCxZTNEBuvxM5gpBBRiNhFRkvbQgG841fo",
+    databaseURL: "https://tabungan-digital-kita-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "tabungan-digital-kita"
+  };
+
+  const DATA_PATH = 'tabunganKita/data';
+
+  let state = { transactions: [], goal: 0, owners: { a: 'Ridwan', b: 'Hafizha' } };
+  let pendingType = null;
+  let pendingPerson = 'a';
+  const accountNumber = 'BPD Kaltimtara - 1502047040';
+  let suppressNextWrite = false; // supaya perubahan yang datang dari server gak nulis balik ke server
+  let dbRef = null;
+
+  function setSyncStatus(mode){
+    const el = $('syncFootnote');
+    if(!el) return;
+    if(mode === 'live'){
+      el.innerHTML = '🟢 Tersambung — perubahan otomatis muncul di semua perangkat (real-time)';
+    } else if(mode === 'error'){
+      el.innerHTML = '⚪ Belum tersambung. Cek koneksi internet atau konfigurasi Firebase, lalu muat ulang halaman.';
+    } else {
+      el.innerHTML = 'Menghubungkan ke database...';
+    }
+  }
+
+  function applyIncomingData(data){
+    if(!data) return;
+    const incoming = JSON.stringify(data.transactions || []);
+    const current = JSON.stringify(state.transactions);
+    if(incoming === current && (data.goal||0) === state.goal) return; // gak ada perubahan
+    suppressNextWrite = true;
+    state.transactions = data.transactions || [];
+    state.goal = data.goal || 0;
+    state.owners = data.owners || state.owners;
+    $('goalInput').value = state.goal || '';
+    render();
+  }
+
+  async function saveState(){
+    if(!dbRef){ return; }
+    if(suppressNextWrite){
+      suppressNextWrite = false;
+      return;
+    }
+    try{
+      await dbRef.set({
+        transactions: state.transactions,
+        goal: state.goal,
+        owners: state.owners
+      });
+      setSyncStatus('live');
+    }catch(e){
+      setSyncStatus('error');
+    }
+  }
+
+  async function startRealtimeSync(){
+    try{
+      const app = firebase.initializeApp(firebaseConfig);
+      dbRef = firebase.database().ref(DATA_PATH);
+
+      dbRef.on('value', (snapshot)=>{
+        const data = snapshot.val();
+        if(data){
+          applyIncomingData(data);
+        }
+        setSyncStatus('live');
+      }, (err)=>{
+        console.error(err);
+        setSyncStatus('error');
+      });
+    }catch(e){
+      console.error(e);
+      setSyncStatus('error');
+    }
+  }
+
+
+  function computeBalanceSeries(){
+    const sorted = [...state.transactions].sort((a,b)=> a.date.localeCompare(b.date) || a.ts - b.ts);
+    let running = 0;
+    return sorted.map(tx=>{
+      running += (tx.type === 'setor' ? tx.amount : -tx.amount);
+      return {...tx, balanceAfter: running};
+    });
+  }
+
+  function render(){
+    const withBalance = computeBalanceSeries();
+    const saldo = withBalance.length ? withBalance[withBalance.length-1].balanceAfter : 0;
+    $('saldoValue').textContent = fmtPlain(saldo);
+
+    const monthlyRecap = getMonthlyRecap();
+    renderChart(monthlyRecap);
+    renderRecapTable(monthlyRecap);
+
+    const nameA = state.owners.a && state.owners.a.trim() ? state.owners.a.trim() : 'Ridwan';
+    const nameB = state.owners.b && state.owners.b.trim() ? state.owners.b.trim() : 'Hafizha';
+    $('pNameA').textContent = nameA;
+    $('pNameB').textContent = nameB;
+    $('avatarA').textContent = nameA.charAt(0).toUpperCase();
+    $('avatarB').textContent = nameB.charAt(0).toUpperCase();
+    $('chipPersonALabel').textContent = nameA;
+    $('chipPersonBLabel').textContent = nameB;
+
+    const totalA = state.transactions.filter(t=>t.person==='a').reduce((a,b)=> a + (b.type==='setor'? b.amount : -b.amount), 0);
+    const totalB = state.transactions.filter(t=>t.person==='b').reduce((a,b)=> a + (b.type==='setor'? b.amount : -b.amount), 0);
+    $('pValA').textContent = fmt(totalA);
+    $('pValB').textContent = fmt(totalB);
+
+    const goal = state.goal || 0;
+    const pct = goal > 0 ? Math.min(100, (saldo/goal)*100) : 0;
+    $('trackFill').style.width = pct + '%';
+    $('trackMarker').style.left = pct + '%';
+    $('goalCurrentText').textContent = fmt(saldo);
+    $('goalTargetText').textContent = goal > 0 ? ('Target: ' + fmt(goal)) : 'Target: belum diatur';
+    $('goalPercentText').textContent = goal > 0 ? (Math.round(pct) + '% menuju target') : 'Atur target untuk melacak progres';
+
+    const existingStamp = document.getElementById('goalStamp');
+    if(goal > 0 && saldo >= goal){
+      if(!existingStamp){
+        const stamp = document.createElement('div');
+        stamp.className = 'stamp';
+        stamp.id = 'goalStamp';
+        stamp.textContent = 'TARGET TERCAPAI';
+        $('saldoCard').appendChild(stamp);
+      }
+    } else if(existingStamp){
+      existingStamp.remove();
+    }
+
+    const totalSetor = state.transactions.filter(t=>t.type==='setor').reduce((a,b)=>a+b.amount,0);
+    const totalTarik = state.transactions.filter(t=>t.type==='tarik').reduce((a,b)=>a+b.amount,0);
+    $('statTotalSetor').textContent = fmt(totalSetor);
+    $('statTotalTarik').textContent = fmt(totalTarik);
+    $('statCount').textContent = state.transactions.length;
+
+    const body = $('ledgerBody');
+    body.innerHTML = '';
+    $('ledgerCount').textContent = state.transactions.length + ' catatan';
+
+    if(withBalance.length === 0){
+      body.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada transaksi. Mulai dengan menekan "Setor".</td></tr>';
+      return;
+    }
+
+    const reversed = [...withBalance].reverse();
+    reversed.forEach(tx=>{
+      const tr = document.createElement('tr');
+      const dateObj = new Date(tx.date + 'T00:00:00');
+      const dateStr = dateObj.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'2-digit'});
+      const isMilestone = tx.type === 'setor' && Math.floor(tx.balanceAfter/1000000) > Math.floor((tx.balanceAfter - tx.amount)/1000000);
+      const personName = tx.person === 'b' ? nameB : nameA;
+      const personColorVar = tx.person === 'b' ? 'var(--person-b)' : 'var(--person-a)';
+      tr.innerHTML = `
+        <td>${dateStr}</td>
+        <td><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:7px;height:7px;border-radius:50%;background:${personColorVar};display:inline-block;"></span>${escapeHtml(personName)}</span></td>
+        <td><div class="desc-cell">${isMilestone ? '<span class="mini-stamp">★</span>' : ''}${escapeHtml(tx.note || (tx.type==='setor' ? 'Setoran' : 'Penarikan'))}</div></td>
+        <td class="num debit-txt">${tx.type==='tarik' ? fmtPlain(tx.amount) : ''}</td>
+        <td class="num credit-txt">${tx.type==='setor' ? fmtPlain(tx.amount) : ''}</td>
+        <td class="num">${fmtPlain(tx.balanceAfter)}</td>
+        <td><button class="del-btn" data-id="${tx.id}" title="Hapus">✕</button></td>
+      `;
+      body.appendChild(tr);
+    });
+
+    body.querySelectorAll('.del-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-id');
+        state.transactions = state.transactions.filter(t=> String(t.id) !== id);
+        saveState();
+        render();
+      });
+    });
+  }
+
+  function getMonthlyRecap() {
+    const monthlyData = {};
+    const sorted = [...state.transactions].sort((a,b)=> a.date.localeCompare(b.date) || a.ts - b.ts);
+    sorted.forEach(tx => {
+      if (!tx.date) return;
+      const monthKey = tx.date.substring(0, 7);
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { monthKey, setorA:0, setorB:0, tarikA:0, tarikB:0, totalSetor:0, totalTarik:0 };
+      }
+      const data = monthlyData[monthKey];
+      if (tx.type === 'setor') {
+        data.totalSetor += tx.amount;
+        if (tx.person === 'a') data.setorA += tx.amount; else data.setorB += tx.amount;
+      } else {
+        data.totalTarik += tx.amount;
+        if (tx.person === 'a') data.tarikA += tx.amount; else data.tarikB += tx.amount;
+      }
+    });
+    return Object.values(monthlyData).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
+  }
+
+  function renderChart(recap) {
+    const container = $('chartContainer');
+    container.innerHTML = '';
+    if (recap.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding: 30px 10px; color: var(--muted); font-size: 13px; font-family:'Inter';">Belum ada data transaksi untuk ditampilkan grafiknya.</div>`;
+      return;
+    }
+    let maxVal = 0;
+    recap.forEach(d => { maxVal = Math.max(maxVal, d.setorA, d.setorB); });
+    if (maxVal === 0) maxVal = 100000;
+    const svgHeight = 150, paddingBottom = 25, paddingTop = 15;
+    const chartHeight = svgHeight - paddingTop - paddingBottom;
+    let barsHtml = '';
+    const barWidth = 14, gapBetweenPeople = 3, gapBetweenMonths = 25;
+    const totalMonthWidth = barWidth * 2 + gapBetweenPeople;
+    const step = totalMonthWidth + gapBetweenMonths;
+    const svgWidth = recap.length * step + gapBetweenMonths;
+    recap.forEach((d, idx) => {
+      const xA = gapBetweenMonths + idx * step;
+      const xB = xA + barWidth + gapBetweenPeople;
+      const heightA = (d.setorA / maxVal) * chartHeight;
+      const heightB = (d.setorB / maxVal) * chartHeight;
+      const yA = svgHeight - paddingBottom - heightA;
+      const yB = svgHeight - paddingBottom - heightB;
+      const dateParts = d.monthKey.split('-');
+      const dateObj = new Date(dateParts[0], dateParts[1] - 1, 1);
+      const monthLabel = dateObj.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
+      barsHtml += `
+        <rect x="${xA}" y="${yA}" width="${barWidth}" height="${heightA}" fill="var(--person-a)" rx="3"><title>Ridwan (${monthLabel}): ${fmt(d.setorA)}</title></rect>
+        <rect x="${xB}" y="${yB}" width="${barWidth}" height="${heightB}" fill="var(--person-b)" rx="3"><title>Hafizha (${monthLabel}): ${fmt(d.setorB)}</title></rect>
+      `;
+      const xCenter = xA + totalMonthWidth / 2;
+      barsHtml += `<text x="${xCenter}" y="${svgHeight - 6}" font-family="'IBM Plex Mono', monospace" font-size="10" fill="var(--muted)" text-anchor="middle">${monthLabel}</text>`;
+    });
+    let gridHtml = '';
+    for (let i = 0; i <= 3; i++) {
+      const val = (maxVal / 3) * i;
+      const y = svgHeight - paddingBottom - (i / 3) * chartHeight;
+      gridHtml += `
+        <line x1="0" y1="${y}" x2="100%" y2="${y}" stroke="var(--paper-line)" stroke-width="0.5" stroke-dasharray="3,3" />
+        <text x="5" y="${y - 3}" font-family="'IBM Plex Mono', monospace" font-size="8" fill="var(--muted)">${fmt(val)}</text>
+      `;
+    }
+    container.innerHTML = `
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:12px; display:flex; gap:12px; align-items:center;">
+        <span>Setoran Bulanan:</span>
+        <span style="display:inline-flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:var(--person-a); border-radius:2px;"></span>Ridwan</span>
+        <span style="display:inline-flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:var(--person-b); border-radius:2px;"></span>Hafizha</span>
+      </div>
+      <div style="overflow-x:auto; width:100%;">
+        <svg width="${Math.max(svgWidth, 300)}" height="${svgHeight}" style="display:block; min-width:100%;">
+          ${gridHtml}${barsHtml}
+        </svg>
+      </div>
+    `;
+  }
+
+  function renderRecapTable(recap) {
+    const body = $('recapBody');
+    body.innerHTML = '';
+    if (recap.length === 0) {
+      body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px 10px; color:var(--muted); font-family:'Inter'; font-size:13px;">Belum ada transaksi bulanan.</td></tr>`;
+      return;
+    }
+    [...recap].reverse().forEach(d => {
+      const dateParts = d.monthKey.split('-');
+      const dateObj = new Date(dateParts[0], dateParts[1] - 1, 1);
+      const monthLabel = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      const net = d.totalSetor - d.totalTarik;
+      const netClass = net >= 0 ? 'credit-txt' : 'debit-txt';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:600;">${monthLabel}</td>
+        <td class="num">${fmtPlain(d.setorA)}</td>
+        <td class="num">${fmtPlain(d.setorB)}</td>
+        <td class="num credit-txt">${fmtPlain(d.totalSetor)}</td>
+        <td class="num debit-txt">${fmtPlain(d.totalTarik)}</td>
+        <td class="num ${netClass}">${net >= 0 ? '+' : ''}${fmtPlain(net)}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function setPendingPerson(p){
+    pendingPerson = p;
+    $('chipPersonA').classList.toggle('a-active', p === 'a');
+    $('chipPersonB').classList.toggle('b-active', p === 'b');
+  }
+
+  $('chipPersonA').addEventListener('click', ()=> setPendingPerson('a'));
+  $('chipPersonB').addEventListener('click', ()=> setPendingPerson('b'));
+
+  function openForm(type){
+    pendingType = type;
+    $('formPanel').classList.add('open');
+    $('formTitle').textContent = type === 'setor' ? 'Catat setoran' : 'Catat penarikan';
+    setPendingPerson(pendingPerson || 'a');
+    $('txDate').value = new Date().toISOString().slice(0,10);
+    $('txAmount').value = '';
+    $('txNote').value = '';
+    const chipRow = $('chipRow');
+    chipRow.innerHTML = '';
+    [10000, 20000, 50000, 100000, 250000].forEach(v=>{
+      const c = document.createElement('div');
+      c.className = 'chip';
+      c.textContent = fmt(v);
+      c.addEventListener('click', ()=>{ $('txAmount').value = v; });
+      chipRow.appendChild(c);
+    });
+    $('txAmount').focus();
+  }
+
+  function closeForm(){
+    $('formPanel').classList.remove('open');
+    pendingType = null;
+  }
+
+  $('btnSetor').addEventListener('click', ()=> openForm('setor'));
+  $('btnTarik').addEventListener('click', ()=> openForm('tarik'));
+  $('btnCancel').addEventListener('click', closeForm);
+
+  $('btnSave').addEventListener('click', ()=>{
+    const amount = parseFloat($('txAmount').value);
+    const date = $('txDate').value;
+    const note = $('txNote').value.trim();
+    if(!amount || amount <= 0){ $('txAmount').focus(); return; }
+    if(!date){ $('txDate').focus(); return; }
+
+    state.transactions.push({
+      id: Date.now() + Math.random(),
+      ts: Date.now(),
+      type: pendingType,
+      person: pendingPerson,
+      amount: amount,
+      date: date,
+      note: note
+    });
+    saveState();
+    render();
+    closeForm();
+  });
+
+  $('goalSaveBtn').addEventListener('click', ()=>{
+    const v = parseFloat($('goalInput').value) || 0;
+    state.goal = v;
+    saveState();
+    render();
+  });
+
+  render();
+  startRealtimeSync();
+})();
+</script>
+</body>
+</html>
