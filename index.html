@@ -591,7 +591,6 @@
   let pendingType = null;
   let pendingPerson = 'a';
   const accountNumber = 'BPD Kaltimtara - 1502047040';
-  let suppressNextWrite = false; // supaya perubahan yang datang dari server gak nulis balik ke server
   let dbRef = null;
 
   function setSyncStatus(mode){
@@ -611,7 +610,6 @@
     const incoming = JSON.stringify(data.transactions || []);
     const current = JSON.stringify(state.transactions);
     if(incoming === current && (data.goal||0) === state.goal) return; // gak ada perubahan
-    suppressNextWrite = true;
     state.transactions = data.transactions || [];
     state.goal = data.goal || 0;
     state.owners = data.owners || state.owners;
@@ -621,10 +619,6 @@
 
   async function saveState(){
     if(!dbRef){ return; }
-    if(suppressNextWrite){
-      suppressNextWrite = false;
-      return;
-    }
     try{
       await dbRef.set({
         transactions: state.transactions,
